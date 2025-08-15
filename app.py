@@ -105,7 +105,7 @@ sample_data = {
         ["Sanitation facility at site etc.", "One time", "nos", 1, 250000],
         ["Labour attendance (Biometric machine )", "One time", "nos", 1, 50000],
     ],
-    "LMB Staff Cost": [
+    "Project Staff Cost": [
         ["Site office containar", "One time", "nos", 1, 500000],
         ["LMB Staff (4 Nos)", "Monthly", "nos", 4, 75000],
         ["Local conveyance for LMB Staff", "Monthly", "nos", 1, 50000],
