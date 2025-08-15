@@ -29,7 +29,7 @@ FREQ_OPTIONS = ["One time", "Monthly", "Quarterly", "Yearly"]
 sample_data = {
     "Plant & Machinery": [
         ["Hydra Crane for Material Handling, Transport, & Fabrication", "Monthly", "Nos", 4, 145000],
-        ["Trailer/Truck/Tractor/Water Tanker", "Monthly", "Nos", 1, 70000],
+        ["Trailer/Truck/Tractor/Water Tanker (site logistics fleet)", "Monthly", "Nos", 1, 70000],
         ["Ambulance (Emergency Service)", "Monthly", "Nos", 1, 75000],
         ["Welding machines (MIG)", "One time", "Nos", 10, 90000],
         ["Welding Machine (ARC)", "One time", "Nos", 15, 45000],
@@ -215,4 +215,361 @@ if all_details_df:
     st.markdown("## GRAND TOTAL (excluding Labour): " + f"Rs.{grand_total:,.0f}", unsafe_allow_html=True)
     total_labour_cost = labours_per_month * labour_payment_per_month * duration_months
     st.success(
-        f"**Total Labour Cost ({labours_per_month} x R**
+        f"**Total Labour Cost ({labours_per_month} x Rs.{labour_payment_per_month:,}/mo x {duration_months} mo): "
+        f"Rs.{total_labour_cost:,.0f}**"
+    )
+    grand_total_incl_labour = grand_total + total_labour_cost
+    st.markdown(
+        f"### Grand Total Including Labour: <span style='color: darkgreen; font-weight:bold;'>Rs.{grand_total_incl_labour:,.0f}</span>",
+        unsafe_allow_html=True
+    )
+    per_mt = (grand_total_incl_labour / total_mt) if total_mt else 0
+    st.markdown(
+        f"### <span style='background-color:#eaffea; padding:3px; border-radius:4px;'>"
+        f"Estimated Fabrication Cost per MT = "
+        f"Rs.{per_mt:,.0f}</span>",
+        unsafe_allow_html=True
+    )
+else:
+    st.warning("Fill at least one section above to see summary and totals below.")
+
+########################################
+# 📈 FABRICATION S-CURVE & LABOUR
+########################################
+st.markdown("---")
+st.header("📈 Fabrication S-Curve: Progress & Manpower (Monthly + Cumulative)")
+
+months = np.arange(1, duration_months + 1) if duration_months > 0 else np.array([], dtype=int)
+
+def s_curve(total_mt, duration_months, start_mt=40, max_mt=0, end_mt=40):
+    """
+    Safe/logistic-ish monthly distribution that handles very short schedules.
+    """
+    if duration_months <= 0:
+        return np.array([])
+    # Default max_mt: assume target monthly rate if provided
+    max_mt = max_mt if max_mt and max_mt > 0 else (total_mt / max(1, duration_months))
+
+    # Start with a smooth logistic allocation
+    m = np.arange(1, duration_months + 1)
+    k = 4 / duration_months if duration_months > 4 else 1
+    midpoint = duration_months / 2
+    raw = 1 / (1 + np.exp(-k * (m - midpoint)))
+    monthly = np.diff(np.insert(raw, 0, 0))
+    monthly = monthly / monthly.sum() * total_mt
+
+    # Edge shaping (guarded for short durations)
+    if duration_months >= 1:
+        monthly[0] = min(start_mt, total_mt) if duration_months > 1 else total_mt
+    if duration_months >= 2:
+        monthly[1] = max(monthly[1], max_mt * 0.6)
+    if duration_months >= 3:
+        monthly[2] = max(monthly[2], max_mt * 0.8)
+    if duration_months >= 2:
+        monthly[-1] = min(end_mt, total_mt - monthly[:-1].sum())
+    if duration_months >= 3:
+        monthly[-2] = max(monthly[-2], max_mt * 0.7)
+
+    # Rebalance to hit total_mt exactly
+    scale = total_mt / max(1e-9, monthly.sum())
+    monthly *= scale
+
+    # If plenty of middle months, distribute any residual evenly across them
+    if duration_months > 6:
+        middle = slice(3, duration_months - 2)
+        residual = total_mt - monthly.sum()
+        if middle.start < middle.stop:
+            monthly[middle] += residual / (middle.stop - middle.start)
+    else:
+        # For short schedules, just set the last month to absorb rounding
+        monthly[-1] += total_mt - monthly.sum()
+
+    monthly = np.maximum(monthly, 0)
+    return monthly
+
+monthly_mt = s_curve(total_mt, duration_months, start_mt=40, max_mt=mt_per_month, end_mt=40)
+cumulative_mt = np.cumsum(monthly_mt) if monthly_mt.size else np.array([])
+
+# Labour: slow start, full after month 3, ramp down at end
+monthly_labour = []
+for i in range(duration_months):
+    if i == 0:
+        monthly_labour.append(int(labours_per_month * 0.23))
+    elif i == 1:
+        monthly_labour.append(int(labours_per_month * 0.60))
+    elif 2 <= i < duration_months - 1:
+        monthly_labour.append(labours_per_month)
+    else:
+        monthly_labour.append(int(labours_per_month * 0.33))
+
+if duration_months > 0:
+    fig = go.Figure()
+    # Cumulative
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=cumulative_mt,
+        mode='lines+markers+text',
+        name='Cumulative MT',
+        line=dict(color='blue', width=2),
+        marker=dict(color='blue', size=9),
+        text=[f"{int(cm)} MT / {lab} Lab" for cm, lab in zip(cumulative_mt, monthly_labour)],
+        textposition="top center",
+        textfont=dict(size=10, color="blue"),
+        hovertemplate='Month %{x}<br>Cumulative: %{y:.0f} MT<br>Labour: %{customdata}',
+        customdata=monthly_labour
+    ))
+    # Monthly
+    fig.add_trace(go.Scatter(
+        x=months,
+        y=monthly_mt,
+        mode='lines+markers+text',
+        name='Monthly MT Output',
+        line=dict(color='green', dash='dash', width=2),
+        marker=dict(color='green', size=9, symbol='diamond'),
+        text=[f"{int(mt)} MT / {lab} Lab" for mt, lab in zip(monthly_mt, monthly_labour)],
+        textposition="bottom center",
+        textfont=dict(size=10, color="green"),
+        hovertemplate='Month %{x}<br>Monthly: %{y:.0f} MT<br>Labour: %{customdata}',
+        customdata=monthly_labour
+    ))
+
+    fig.update_layout(
+        title="S-Curve: Fabrication Progress and Labour Deployment",
+        xaxis_title="Month",
+        yaxis_title="MT (Monthly and Cumulative)",
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        height=480,
+        margin=dict(l=10, r=10, t=40, b=10),
+        xaxis=dict(
+            tickmode='array',
+            tickvals=months,
+            ticktext=[str(m) for m in months]
+        )
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Show Data Table
+    df_curve = pd.DataFrame({
+        "Month": months,
+        "Monthly MT": [f"{mt:.0f}" for mt in monthly_mt],
+        "Cumulative MT": [f"{cm:.0f}" for cm in cumulative_mt],
+        "Labours": monthly_labour
+    })
+    st.dataframe(df_curve, use_container_width=True)
+
+########################################
+# 📄 PDF REPORT GENERATION
+########################################
+def project_details_card(pdf, total_mt, mt_per_month, labours_per_month, labour_payment_per_month, duration_months):
+    pdf.set_draw_color(120, 120, 120)
+    pdf.set_fill_color(235, 239, 250)
+    pdf.set_line_width(0.3)
+    card_y = pdf.get_y()
+    card_h = 27
+    pdf.rect(10, card_y, 190, card_h, 'DF')
+    pdf.set_xy(14, card_y + 2)
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.cell(0, 5, "Project Details", ln=1)
+    pdf.set_font("Helvetica", "", 7)
+    x_start = 15
+    pdf.set_x(x_start)
+    pdf.cell(55, 5, f"Total Project Scope:", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.cell(23, 5, f"{total_mt:,.2f} MT", ln=0)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.cell(38, 5, f"Output (MT/month):", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.cell(21, 5, f"{mt_per_month:,.2f}", ln=1)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.set_x(x_start)
+    pdf.cell(55, 5, f"Expected Labours/Month:", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.cell(23, 5, f"{labours_per_month}", ln=0)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.cell(38, 5, f"Avg. Labour Payment (Rs/mo):", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.cell(21, 5, f"Rs.{labour_payment_per_month:,.2f}", ln=1)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.set_x(x_start)
+    pdf.cell(55, 5, f"Duration (months):", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.cell(23, 5, f"{duration_months}", ln=0)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.cell(38, 5, f"Total Area Required:", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.cell(21, 5, "30,000 Sqm", ln=1)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.ln(1)
+    pdf.set_y(card_y + card_h + 2)
+
+def totals_card(pdf, grand_total, total_labour_cost, grand_total_incl_labour, per_mt):
+    pdf.set_fill_color(233, 249, 235)
+    card_y = pdf.get_y()
+    card_h = 24
+    pdf.set_draw_color(100, 170, 100)
+    pdf.set_line_width(0.3)
+    pdf.rect(10, card_y, 190, card_h, 'DF')
+    pdf.set_xy(14, card_y + 2)
+    pdf.set_font("Helvetica", "B", 9)
+    pdf.cell(0, 5, "Summary of Project Cost", ln=1)
+    pdf.set_font("Helvetica", "", 7)
+    x_start = 15
+    pdf.set_x(x_start)
+    pdf.cell(65, 5, "Grand Total (excluding Labour):", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(30, 80, 180)
+    pdf.cell(35, 5, f"Rs.{grand_total:,.2f}", ln=0)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.cell(40, 5, "Labour Cost:", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(30, 120, 30)
+    pdf.cell(35, 5, f"Rs.{total_labour_cost:,.2f}", ln=1)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_x(x_start)
+    pdf.cell(65, 5, "Grand Total incl. Labour:", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(30, 80, 180)
+    pdf.cell(35, 5, f"Rs.{grand_total_incl_labour:,.2f}", ln=0)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font("Helvetica", "", 7)
+    pdf.cell(40, 5, "Estimated Fabrication Cost per MT:", ln=0)
+    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_text_color(40, 130, 50)
+    pdf.cell(35, 5, f"Rs.{per_mt:,.2f}", ln=1)
+    pdf.set_text_color(0, 0, 0)
+    pdf.ln(1)
+    pdf.set_y(card_y + card_h + 2)
+
+def dataframe_to_pdf_table(pdf, df, title, columns, col_widths):
+    pdf.set_font("Helvetica", "B", 11)
+    pdf.cell(0, 10, title, ln=1, align='C')
+    pdf.set_font("Helvetica", "B", 8)
+    for i, col in enumerate(columns):
+        pdf.cell(col_widths[i], 7, col, border=1, align="C", fill=True)
+    pdf.ln()
+    pdf.set_font("Helvetica", "", 7)
+    for _, row in df.iterrows():
+        for i, col in enumerate(columns):
+            val = str(row[col])
+            if col in ["Quantity", "Rate", "Period x", "Amount"]:
+                try:
+                    val = f"{float(val):,.2f}"
+                except Exception:
+                    pass
+            if col == "Amount":
+                val = "Rs. " + val
+            pdf.cell(
+                col_widths[i], 7, val[:65],
+                border=1,
+                align="R" if col in ["Quantity", "Rate", "Period x", "Amount"] else "L",
+                fill=False
+            )
+        pdf.ln()
+
+def export_pdf_report(all_dfs, order, totals, grand_total, total_labour_cost, grand_total_incl_labour,
+                      per_mt, total_mt, mt_per_month, labours_per_month, labour_payment_per_month, duration_months):
+    pdf = FPDF(orientation='P', unit="mm", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=14)
+    columns = ["Description", "Frequency", "Unit", "Quantity", "Rate", "Period x", "Amount"]
+    col_widths = [75, 19, 13, 18, 19, 17, 29]
+
+    # PAGE 1
+    pdf.add_page()
+    pdf.set_font("Helvetica", "B", 15)
+    pdf.cell(0, 11, "Fabrication Detailed Estimate Report", ln=1, align='C')
+    pdf.set_font("Arial", size=6)
+    pdf.ln(-4)
+    pdf.cell(0, 6, "Approx Scope/unit = 4000 MT | Total - 3 Units  | Total = 12000 MT (4-month Phase gap between units)", ln=1, align='C')
+    pdf.set_font("Arial", size=10)
+    project_details_card(pdf, total_mt, mt_per_month, labours_per_month, labour_payment_per_month, duration_months)
+
+    for idx in range(0, min(3, len(order))):
+        center = order[idx]
+        df = all_dfs[center]
+        dataframe_to_pdf_table(pdf, df, center, columns, col_widths)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.cell(0, 7, f"Subtotal for {center}: Rs.{totals[center]:,.2f}", ln=1)
+        pdf.ln(2)
+
+    # PAGE 2
+    pdf.add_page()
+    for idx in range(3, len(order)):
+        center = order[idx]
+        df = all_dfs[center]
+        dataframe_to_pdf_table(pdf, df, center, columns, col_widths)
+        pdf.set_font("Helvetica", "B", 9)
+        pdf.cell(0, 7, f"Subtotal for {center}: Rs.{totals[center]:,.2f}", ln=1)
+        pdf.ln(2)
+
+    pdf.ln(2)
+    totals_card(pdf, grand_total, total_labour_cost, grand_total_incl_labour, per_mt)
+    pdf.set_font("Helvetica", "I", 8)
+    pdf.set_text_color(140, 0, 0)
+    pdf.ln(4)
+    pdf.multi_cell(0, 6, "Note: Above cost is considered excluding Duct Mock_up Assembly, local authority approvals & local Liasoning Cost.")
+    pdf.set_text_color(0, 0, 0)
+    return pdf
+
+# ---- PDF + EXCEL Export Buttons (sidebar) ----
+if all_details_df:
+    cost_center_dfs = {}
+    subtotals = {}
+    cost_order = [df["Cost Center"].iloc[0] for df in all_details_df]
+    for df in all_details_df:
+        if not df.empty:
+            center = df["Cost Center"].iloc[0]
+            cost_center_dfs[center] = df[["Description", "Frequency", "Unit", "Quantity", "Rate", "Period x", "Amount"]]
+            subtotals[center] = df["Amount"].sum()
+
+    # Recompute key totals in case block above didn't run
+    summary = pd.concat(all_details_df, ignore_index=True)
+    grand_total = summary["Amount"].sum()
+    total_labour_cost = labours_per_month * labour_payment_per_month * duration_months
+    grand_total_incl_labour = grand_total + total_labour_cost
+    per_mt = (grand_total_incl_labour / total_mt) if total_mt else 0
+
+    if st.sidebar.button("Generate PDF Report"):
+        pdf = export_pdf_report(
+            cost_center_dfs, cost_order, subtotals,
+            grand_total, total_labour_cost, grand_total_incl_labour,
+            per_mt, total_mt, mt_per_month, labours_per_month, labour_payment_per_month, duration_months,
+        )
+        tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf")
+        pdf.output(tmp_file.name)
+        with open(tmp_file.name, "rb") as f:
+            st.sidebar.download_button(
+                "Download PDF",
+                f,
+                file_name="Fabrication_Estimate_Report.pdf",
+                mime="application/pdf"
+            )
+
+    # Excel Export
+    export_df = pd.concat(all_details_df, ignore_index=True)
+    export_columns = ["Cost Center", "Description", "Frequency", "Unit", "Quantity", "Rate", "Period x", "Amount"]
+    export_df = export_df[export_columns]
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        export_df.to_excel(writer, index=False, sheet_name="Summary", startrow=1, header=False)
+        workbook = writer.book
+        worksheet = writer.sheets['Summary']
+        # Headers
+        for col_num, value in enumerate(export_columns):
+            worksheet.write(0, col_num, value)
+        # Amount formula
+        for row_num in range(1, len(export_df) + 1):
+            worksheet.write_formula(
+                row_num,
+                export_columns.index('Amount'),
+                f"=F{row_num+1}*G{row_num+1}*H{row_num+1}"  # F=Qty, G=Rate, H=Period x
+            )
+    buffer.seek(0)
+    st.sidebar.download_button(
+        label="Download Report as Excel",
+        data=buffer,
+        file_name="Fabrication_Cost_Details.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
