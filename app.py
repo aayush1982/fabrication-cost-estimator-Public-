@@ -21,7 +21,7 @@ cost_centers = [
     "Consumables",
     "Safety Items",
     "Infrastructure",
-    "LMB Staff Cost",
+    "Project Staff Cost",
 ]
 
 FREQ_OPTIONS = ["One time", "Monthly", "Quarterly", "Yearly"]
@@ -107,8 +107,8 @@ sample_data = {
     ],
     "Project Staff Cost": [
         ["Site office containar", "One time", "nos", 1, 500000],
-        ["LMB Staff (4 Nos)", "Monthly", "nos", 4, 75000],
-        ["Local conveyance for LMB Staff", "Monthly", "nos", 1, 50000],
+        ["Project Staff (4 Nos)", "Monthly", "nos", 4, 75000],
+        ["Local conveyance for Project Staff", "Monthly", "nos", 1, 50000],
     ]
 }
 
