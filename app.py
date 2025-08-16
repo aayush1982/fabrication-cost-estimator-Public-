@@ -93,7 +93,7 @@ sample_data = {
         ["Maintenance of Area including Road & Drain ", "Yearly", "nos", 1, 500000],
         ["In general area Lighting - Light Mast", "One time", "nos", 2, 200000],
         ["Security Gaurd (3 Nos per shift)", "Monthly", "Nos", 9, 15000],
-        ["Contractor staff wages (5 Nos)", "Monthly", "Nos", 5, 25000],
+        ["Contractor staff wages (6 Nos)", "Monthly", "Nos", 6, 30000],
         ["Contractor staff accommodation", "Monthly", "nos", 5, 8000],
         ["Local conveyance for contractor Staff", "Monthly", "nos", 1, 40000],
         ["Contractor site office space (Porta Cabin)", "One time", "nos", 1, 400000],
