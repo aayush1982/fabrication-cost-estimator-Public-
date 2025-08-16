@@ -91,7 +91,7 @@ sample_data = {
         ["Internal Drain (1600 m x 2) (Both sides)", "One time", "Mtr", 3200, 300],
         ["Area Fencing, CCTV, watchtowers", "One time", "Nos", 1, 2500000],
         ["Maintenance of Area including Road & Drain ", "Yearly", "nos", 1, 500000],
-        ["In general area Lighting - Light Mast", "One time", "nos", 1, 200000],
+        ["In general area Lighting - Light Mast", "One time", "nos", 2, 200000],
         ["Security Gaurd (3 Nos per shift)", "Monthly", "Nos", 9, 15000],
         ["Contractor staff wages (5 Nos)", "Monthly", "Nos", 5, 25000],
         ["Contractor staff accommodation", "Monthly", "nos", 5, 8000],
