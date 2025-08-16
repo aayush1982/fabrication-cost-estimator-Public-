@@ -29,7 +29,8 @@ FREQ_OPTIONS = ["One time", "Monthly", "Quarterly", "Yearly"]
 sample_data = {
     "Plant & Machinery": [
         ["Hydra Crane for Material Handling, Transport, & Fabrication", "Monthly", "Nos", 4, 145000],
-        ["Trailer/Tractor/Water Tanker", "Monthly", "Nos", 1, 75000],
+        ["Trailer/Water Tanker", "Monthly", "Nos", 1, 75000],
+        ["Tractor with operator & diesel", "Monthly", "Nos", 1, 40000],
         ["Ambulance (Emergency Service)", "Monthly", "Nos", 1, 75000],
         ["Welding machines (MIG)", "One time", "Nos", 10, 90000],
         ["Welding Machine (ARC)", "One time", "Nos", 15, 45000],
