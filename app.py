@@ -451,7 +451,7 @@ def dataframe_to_pdf_table(pdf, df, title, columns, col_widths):
     pdf.cell(0, 10, title, ln=1, align='C')
     pdf.set_font("Helvetica", "B", 7)
     for i, col in enumerate(columns):
-        pdf.cell(col_widths[i], 7, col, border=1, align="C", fill=True)
+        pdf.cell(col_widths[i], 6, col, border=1, align="C", fill=True)
     pdf.ln()
     pdf.set_font("Helvetica", "", 7)
     for _, row in df.iterrows():
@@ -465,7 +465,7 @@ def dataframe_to_pdf_table(pdf, df, title, columns, col_widths):
             if col == "Amount":
                 val = "Rs. " + val
             pdf.cell(
-                col_widths[i], 7, val[:65],
+                col_widths[i], 6, val[:65],
                 border=1,
                 align="R" if col in ["Quantity", "Rate", "Period x", "Amount"] else "L",
                 fill=False
