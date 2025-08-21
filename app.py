@@ -369,7 +369,7 @@ def project_details_card(pdf, total_mt, mt_per_month, labours_per_month, labour_
     pdf.set_fill_color(235, 239, 250)
     pdf.set_line_width(0.3)
     card_y = pdf.get_y()
-    card_h = 25
+    card_h = 20
     pdf.rect(10, card_y, 190, card_h, 'DF')
     pdf.set_xy(14, card_y + 2)
     pdf.set_font("Helvetica", "B", 9)
