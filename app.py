@@ -131,7 +131,7 @@ consumable_base_qty_map = {
 st.sidebar.header("Project Size Inputs")
 total_mt = st.sidebar.number_input("Total Fabrication Scope (MT)", min_value=1, value=4000, step=1)
 mt_per_month = st.sidebar.number_input("Expected Fabrication Output (MT/month)", min_value=1, value=250, step=1)
-labours_per_month = st.sidebar.number_input("Expected No. of Labours/Month", min_value=1, value=110, step=1)
+labours_per_month = st.sidebar.number_input("Expected No. of Labours/Month", min_value=1, value=120, step=1)
 labour_payment_per_month = st.sidebar.number_input("Avg. Labour Payment per Month (Rs/month)", min_value=1, value=21000, step=100)
 duration_months = math.ceil(total_mt / mt_per_month) if mt_per_month > 0 else 0
 st.sidebar.markdown(f"**Estimated Duration:** `{duration_months}` months")
