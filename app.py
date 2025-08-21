@@ -369,7 +369,7 @@ def project_details_card(pdf, total_mt, mt_per_month, labours_per_month, labour_
     pdf.set_fill_color(235, 239, 250)
     pdf.set_line_width(0.3)
     card_y = pdf.get_y()
-    card_h = 20
+    card_h = 22
     pdf.rect(10, card_y, 190, card_h, 'DF')
     pdf.set_xy(14, card_y + 2)
     pdf.set_font("Helvetica", "B", 9)
@@ -447,9 +447,9 @@ def totals_card(pdf, grand_total, total_labour_cost, grand_total_incl_labour, pe
     pdf.set_y(card_y + card_h + 2)
 
 def dataframe_to_pdf_table(pdf, df, title, columns, col_widths):
-    pdf.set_font("Helvetica", "B", 11)
+    pdf.set_font("Helvetica", "B", 10)
     pdf.cell(0, 10, title, ln=1, align='C')
-    pdf.set_font("Helvetica", "B", 8)
+    pdf.set_font("Helvetica", "B", 7)
     for i, col in enumerate(columns):
         pdf.cell(col_widths[i], 7, col, border=1, align="C", fill=True)
     pdf.ln()
