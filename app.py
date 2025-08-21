@@ -77,16 +77,7 @@ sample_data = {
         ["Copper Slag for Surface Blasting (7MT/250MT Fabrication)", "Monthly", "Nos", 7, 300],
         ["Electricity Consumption(100-kWh per MT)", "Monthly", "kWh", 25000, 8],
     ],
-    "Safety Items": [
-        ["First aid Boxes /Centre with Medical Attendant", "Monthly", "nos", 1, 20000],
-        ["Safety Helmets- Karam(Ratchet Type PN-521/501)", "Quarterly", "nos", 100, 350],
-        ["Safety Jackets- Axtion/karam/Reflectosafe", "Quarterly", "nos", 100, 80],
-        ["Safety Shoe-Karam(FS 01)/Vudgyogi/Tiger/Acme", "Quarterly", "nos", 100, 1000],
-        ["Nose Mask , Ear Plug & Muff-Venes V-410", "Quarterly", "nos", 100, 40],
-        ["All types of Hand gloves, Apron, ...shield", "Quarterly", "nos", 25, 1000],
-        ["Safety Googles-Karam(ES 006/007)", "Quarterly", "nos", 30, 200],
-        ["Fire-fighting equipments like buckets, extinguishers etc.-safe-pro", "One time", "nos", 10, 5000],
-    ],
+    
     "Infrastructure": [
         ["Land on lease", "Monthly", "nos", 1, 200000],
         ["Land Development(Grading, cutting, filling compaction(95% PD)", "One time", "Sqm", 30000, 110],
@@ -107,6 +98,16 @@ sample_data = {
         ["Necessary job area lighting", "One time", "nos", 1, 25000],
         ["Sanitation facility at site etc.", "One time", "nos", 1, 250000],
         ["Labour attendance (Biometric machine )", "One time", "nos", 1, 50000],
+    ],
+    "Safety Items": [
+        ["First aid Boxes /Centre with Medical Attendant", "Monthly", "nos", 1, 20000],
+        ["Safety Helmets- Karam(Ratchet Type PN-521/501)", "Quarterly", "nos", 100, 350],
+        ["Safety Jackets- Axtion/karam/Reflectosafe", "Quarterly", "nos", 100, 80],
+        ["Safety Shoe-Karam(FS 01)/Vudgyogi/Tiger/Acme", "Quarterly", "nos", 100, 1000],
+        ["Nose Mask , Ear Plug & Muff-Venes V-410", "Quarterly", "nos", 100, 40],
+        ["All types of Hand gloves, Apron, ...shield", "Quarterly", "nos", 25, 1000],
+        ["Safety Googles-Karam(ES 006/007)", "Quarterly", "nos", 30, 200],
+        ["Fire-fighting equipments like buckets, extinguishers etc.-safe-pro", "One time", "nos", 10, 5000],
     ],
     "Project Staff Cost": [
         ["Site office containar", "One time", "nos", 1, 500000],
