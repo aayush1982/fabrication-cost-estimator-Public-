@@ -481,7 +481,7 @@ def export_pdf_report(all_dfs, order, totals, grand_total, total_labour_cost, gr
 
     # PAGE 1
     pdf.add_page()
-    pdf.set_font("Helvetica", "B", 15)
+    pdf.set_font("Helvetica", "B", 12)
     pdf.cell(0, 11, "Fabrication Detailed Estimate Report", ln=1, align='C')
     pdf.set_font("Arial", size=6)
     pdf.ln(-4)
@@ -493,8 +493,8 @@ def export_pdf_report(all_dfs, order, totals, grand_total, total_labour_cost, gr
         center = order[idx]
         df = all_dfs[center]
         dataframe_to_pdf_table(pdf, df, center, columns, col_widths)
-        pdf.set_font("Helvetica", "B", 9)
-        pdf.cell(0, 7, f"Subtotal for {center}: Rs.{totals[center]:,.2f}", ln=1)
+        pdf.set_font("Helvetica", "B", 8)
+        pdf.cell(0, 6, f"Subtotal for {center}: Rs.{totals[center]:,.2f}", ln=1)
         pdf.ln(2)
 
     # PAGE 2
