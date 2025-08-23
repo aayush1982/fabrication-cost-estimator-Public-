@@ -79,7 +79,7 @@ sample_data = {
     ],
     
     "Infrastructure": [
-        ["Land on lease", "Monthly", "nos", 1, 200000],
+        ["Land on lease", "Monthly", "nos", 1, 120000],
         ["Land Development(Grading, cutting, filling compaction(95% PD)", "One time", "Sqm", 30000, 110],
         ["Internal Roads (1600 m x 3 m) (WBM)", "One time", "Sqm", 4800, 300],
         ["Internal Drain (1600 m x 2) (Both sides)", "One time", "Mtr", 3200, 300],
