@@ -486,7 +486,7 @@ def export_pdf_report(all_dfs, order, totals, grand_total, total_labour_cost, gr
     pdf.cell(0, 11, "Fabrication Detailed Estimate Report", ln=1, align='C')
     pdf.set_font("Arial", size=6)
     pdf.ln(-4)
-    #pdf.cell(0, 6, "Approx Scope/unit = 4000 MT | Total - 3 Units  | Total = 12000 MT (4-month Phase gap between units)", ln=1, align='C')
+    pdf.cell(0, 6, "Approx Scope/unit = 4000 MT | Total - 3 Units  | Total = 12000 MT (4-month Phase gap between units)", ln=1, align='C')
     pdf.set_font("Arial", size=10)
     project_details_card(pdf, total_mt, mt_per_month, labours_per_month, labour_payment_per_month, duration_months)
 
