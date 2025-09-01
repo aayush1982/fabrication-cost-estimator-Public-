@@ -514,7 +514,7 @@ def export_pdf_report(all_dfs, order, totals, grand_total, total_labour_cost, gr
     pdf.set_font("Helvetica", "I", 8)
     pdf.set_text_color(140, 0, 0)
     pdf.ln(4)
-    pdf.multi_cell(0, 6, "Note: Above cost is considered excluding Duct Mock_up Assembly, local authority approvals & local Liasoning Cost.")
+    pdf.multi_cell(0, 6, "Note: Above cost is considered excluding local authority approvals & local Liasoning Cost.")
     pdf.set_text_color(0, 0, 0)
     return pdf
 
