@@ -36,6 +36,7 @@ sample_data = {
         ["Ambulance (Emergency Service)", "Monthly", "Nos", 1, 75000],
         ["Welding machines (MIG)", "One time", "Nos", 10, 90000],
         ["Welding Machine (ARC)", "One time", "Nos", 15, 45000],
+        ["Transformer HT (630 kVA 11/0.433 kV)", "One time", "Nos", 1, 3000000],
         ["DG Set for fabrication 200 KVA (with maintenance & service)", "One time", "Nos", 1, 1000000],
     ],
     "Heavy Tools": [
